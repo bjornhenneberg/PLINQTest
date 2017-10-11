@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PLINQ
@@ -24,6 +25,12 @@ namespace PLINQ
                     case 1:
                         CalculateFibonacci();
                         break;
+                    case 2:
+                        PlinqTest1();
+                        break;
+                    case 3:
+                        TaskCPUThreads();
+                        break;
                 }
             } while (running);
 
@@ -36,6 +43,7 @@ namespace PLINQ
             Console.WriteLine("Fibonacci Tests");
             Console.WriteLine();
             Console.WriteLine("1. Calculate Fibonacci Numbers");
+            Console.WriteLine("2. Get Even Numbers");
             Console.WriteLine();
             Console.WriteLine("[0] Back");
             Console.WriteLine();
@@ -67,7 +75,7 @@ namespace PLINQ
                 //index++;
             }
             var parelapsed = sw.Elapsed;
-            Console.WriteLine("    {0} fibonacci numbers took {1} using PLINQ", amount,parelapsed);
+            Console.WriteLine("    {0} fibonacci numbers took {1} using PLINQ", amount, parelapsed);
 
             Console.WriteLine();
 
@@ -101,6 +109,104 @@ namespace PLINQ
                 b = temp + b;
             }
             return a;
+        }
+
+        public void PlinqTest1()
+        {
+            int[] source = Enumerable.Range(1, 10000000).ToArray();
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            // Opt in to PLINQ with AsParallel.
+            for (int i = 0; i < source.Length; i++)
+            {
+                source[i] = source[i] * 2;
+            }
+            sw.Stop();
+            Console.WriteLine("{1} total - {2}", source.Count(), source.Count(), sw.ElapsedMilliseconds);
+
+            Stopwatch sw2 = new Stopwatch();
+            sw2.Start();
+            // Opt in to PLINQ with AsParallel.
+            Parallel.For(0, source.Length, item =>
+            {
+                source[item] = source[item] * 2;
+            });
+
+            sw2.Stop();
+            Console.WriteLine("{1} total - {2}", source.Count(), source.Count(), sw2.ElapsedMilliseconds);
+
+
+            Console.ReadLine();
+        }
+
+        public void TaskTest()
+        {
+            Console.Clear();
+            Console.WriteLine("Task Test");
+            var sw = Stopwatch.StartNew();
+
+            Task t1 = Task.Factory.StartNew(Wait2Sec);
+            Task t2 = Task.Factory.StartNew(Wait2Sec);
+            Task.WaitAll(t1, t2);
+
+            Console.WriteLine("Task.Factory.StartNew = " + sw.ElapsedMilliseconds / 1000.0);
+            sw.Reset();
+            sw.Start();
+
+            Parallel.Invoke(Wait2Sec, Wait2Sec);
+            Console.WriteLine("Parallel.Invoke = " + sw.ElapsedMilliseconds / 1000.0);
+            Console.ReadLine();
+        }
+
+        public void Wait2Sec()
+        {
+            Thread.Sleep(2000);
+        }
+
+        public async void TaskExample()
+        {
+            // Create a task and supply a user delegate by using a lambda expression. 
+            Task taskA = new Task(() => Console.WriteLine("Hello from taskA."));
+            // Start the task.
+            taskA.Start();
+
+            // Output a message from the calling thread.
+            Console.WriteLine("Hello from thread Main.");
+            taskA.Wait();
+            Console.ReadLine();
+        }
+
+        public async Task<int> LongRunning()
+        {
+            await Task.Delay(1000);
+            return 1;
+        }
+
+        public void TaskCPUThreads()
+        {
+            Task[] taskArray = new Task[100];
+            for (int i = 0; i < taskArray.Length; i++)
+            {
+                taskArray[i] = Task.Factory.StartNew((Object obj) =>
+                {
+                    CustomData data = obj as CustomData;
+                    if (data == null)
+                        return;
+
+                    data.ThreadNum = Thread.CurrentThread.ManagedThreadId;
+                },
+                                                      new CustomData() { Name = i, CreationTime = DateTime.Now.Ticks });
+            }
+            Task.WaitAll(taskArray);
+            foreach (var task in taskArray)
+            {
+                var data = task.AsyncState as CustomData;
+                if (data != null)
+                    Console.WriteLine("Task #{0} created at {1}, ran on thread #{2}.",
+                                      data.Name, data.CreationTime, data.ThreadNum);
+            }
+            Console.ReadLine();
         }
     }
 }

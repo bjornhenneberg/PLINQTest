@@ -58,7 +58,7 @@ namespace PLINQ
             Console.WriteLine("    Running Sequential For Loop");
             Stopwatch sw = Stopwatch.StartNew();
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 DauntingOp(i);
                 DauntingOp(i + i);
@@ -76,7 +76,7 @@ namespace PLINQ
             Console.WriteLine("    Running Parallel For Loop");
             Stopwatch sw = Stopwatch.StartNew();
 
-            Parallel.For(0, 1000, (elem) =>
+            Parallel.For(0, 100, (elem) =>
             {
                 DauntingOp(elem);
                 DauntingOp(elem + elem);

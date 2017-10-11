@@ -160,6 +160,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomData.cs" />
     <Compile Include="Fibonacci.cs" />
     <Compile Include="Models\Alphabetical_list_of_products.cs" />
     <Compile Include="Models\Categories.cs" />
