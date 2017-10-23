@@ -46,6 +46,9 @@ namespace PLINQ
                     case 5:
                         new Fibonacci().RunMenu();
                         break;
+                    case 6:
+                        new Synopsis();
+                        break;
                 }
             } while (running);
 
@@ -62,6 +65,7 @@ namespace PLINQ
             Console.WriteLine("3. Picture Tests");
             Console.WriteLine("4. PLINQ Tests");
             Console.WriteLine("5. Fibonacci Tests");
+            Console.WriteLine("6. Synopsis");
             Console.WriteLine("");
             Console.WriteLine("[0] Exit");
             Console.WriteLine();
